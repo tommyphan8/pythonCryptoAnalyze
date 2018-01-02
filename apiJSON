@@ -1,0 +1,72 @@
+import requests
+import cryptoStructure
+import cryptoCurrency
+
+url = "https://api.coinmarketcap.com/v1/ticker/?limit=0"
+
+
+def loadAPIJSON():
+    response = requests.get(url)
+    data = response.json()
+    return data
+
+def printCrypto(crypto):
+    print crypto['name']
+    print crypto['symbol']
+    print "Rank: " + crypto['rank']
+    print "Market Cap: " + "{:,}".format(float(crypto['market_cap_usd']))
+    print "Supply: " + crypto['available_supply']
+    print "Price: " + crypto['price_usd']
+    print "Volume 24h: " + "{:,}".format(float(crypto['24h_volume_usd']))
+    print "Volume 24h/Market Cap%:" + str(float(crypto['24h_volume_usd'])/float(crypto['market_cap_usd'])*100)
+    print "Percent change 24h %: " + crypto['percent_change_24h']
+    print
+
+
+def sortSupplyVolume24(data):
+    crypto_list = []
+
+    for x in data:
+        if x['available_supply'] is not None and x['24h_volume_usd'] is not None and x[
+            'percent_change_24h'] is not None:
+            aSupply = float(x['available_supply'])
+            if aSupply >= 50000000 and aSupply <= 65000000:
+                crypto_list.append(x)
+
+    crypto_list.sort(key=lambda v: float(v['24h_volume_usd']), reverse=True)
+    return crypto_list
+
+
+
+def sortVolumeMarketCap(data):
+    crypto_list = []
+
+    for x in data:
+        if x['market_cap_usd'] is not None and x['24h_volume_usd'] is not None:
+            market_cap = float[x['market_cap_usd']]
+            volume_24 = float[x['24h_volume_usd']]
+            crypto_list.append(getPercentMarketCapVolume(market_cap,volume_24))
+
+
+
+def getPercentMarketCapVolume(market_cap, volume_24):
+    return market_cap/volume_24
+
+data = loadAPIJSON()
+cryptos = cryptoStructure.cryptoStructure()
+for x in data:
+    cryptos.addCrypto(cryptoCurrency.cryptoCurrency(x))
+
+
+print("Test")
+for x in cryptos.getSortedSupplyVolume24(50000000, 65000000):
+    print(x)
+    # print(cryptoCurrency.cryptoCurrency(x))
+data = loadAPIJSON()
+crypto_list = sortSupplyVolume24(data)
+
+
+for x in crypto_list:
+    printCrypto(x)
+
+
